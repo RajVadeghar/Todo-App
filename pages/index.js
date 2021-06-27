@@ -12,6 +12,7 @@ export default function Home({ todos, activeTodos, completedTodos }) {
     const mode = isDark ? false : true;
     setDark(mode);
   };
+  
 
   return loading ? (
     <div className="grid place-items-center h-screen bg-gray-800">
