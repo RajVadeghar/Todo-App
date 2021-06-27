@@ -8,8 +8,6 @@ export default function Home({ todos }) {
   const [session, loading] = useSession();
   const [isDark, setDark] = useState(false);
 
-  console.log(todos);
-
   const handleDarkMode = () => {
     const mode = isDark ? false : true;
     setDark(mode);
@@ -23,7 +21,11 @@ export default function Home({ todos }) {
         <title>TODO App</title>
       </Head>
 
-      {!session && <>{signIn()}</>}
+      {!session && (
+        <div>
+          <button onClick={() => signIn()}>Sign In</button>
+        </div>
+      )}
       {session && (
         <TodosHome
           isDark={isDark}
