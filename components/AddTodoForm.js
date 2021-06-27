@@ -1,6 +1,7 @@
 import { useState } from "react";
-import axios from "../axios";
+import firebase from "firebase";
 import { useSession } from "next-auth/client";
+import firebasedb from "../firebase";
 
 function AddTodoForm() {
   const [title, setTitle] = useState("");
@@ -9,11 +10,18 @@ function AddTodoForm() {
   const addTodo = async (e) => {
     e.preventDefault();
 
-    await axios
-      .post("/api/todos", {
-        username: session?.user?.name,
-        title,
-      })
+    const data = {
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      username: session?.user?.name,
+      title: title,
+      isChecked: false,
+    };
+
+    const response = await firebasedb
+      .collection("users")
+      .doc(session?.user?.name)
+      .collection("todos")
+      .add(data)
       .then(() => {
         setTitle("");
       });
