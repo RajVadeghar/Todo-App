@@ -34,7 +34,7 @@ function ViewTemplate({ id, title, isChecked, setEditing }) {
   };
 
   return (
-    <div className="flex items-center h-14 shadow-inner hover:bg-gray-200 dark:hover:bg-gray-900">
+    <div className="flex items-center py-5 h-auto shadow-inner hover:bg-gray-200 dark:hover:bg-gray-900">
       {!isChecked ? (
         <p
           className="h-5 w-5 border-2 border-gray-700 rounded-full ml-3 z-50 cursor-pointer opacity-80"
@@ -50,7 +50,7 @@ function ViewTemplate({ id, title, isChecked, setEditing }) {
         className={`${
           isChecked &&
           "line-through text-black text-opacity-40 dark:text-white dark:text-opacity-40"
-        } flex-grow px-3 text-black text-opacity-80 dark:text-white dark:text-opacity-80`}
+        } break-all flex-grow mx-3 text-black text-opacity-80 dark:text-white dark:text-opacity-80`}
         onDoubleClick={handleDoubleClick}
       >
         {title}
