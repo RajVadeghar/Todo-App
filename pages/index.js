@@ -1,11 +1,10 @@
 import Head from "next/head";
-import { getSession, signIn, useSession } from "next-auth/client";
+import { getSession, signIn } from "next-auth/client";
 import TodosHome from "../components/TodosHome";
 import firebasedb from "../firebase";
 import { useState } from "react";
 
-export default function Home({ todos }) {
-  const [session, loading] = useSession();
+export default function Home({ todos, session }) {
   const [isDark, setDark] = useState(false);
 
   const handleDarkMode = () => {
@@ -13,10 +12,8 @@ export default function Home({ todos }) {
     setDark(mode);
   };
 
-  return loading ? (
-    <div className="grid h-screen place-items-center">loading...</div>
-  ) : (
-    <div className={isDark && "dark"}>
+  return (
+    <div className={`${isDark && "dark"}`}>
       <Head>
         <title>TODO App</title>
       </Head>
@@ -38,7 +35,6 @@ export default function Home({ todos }) {
 }
 
 export async function getServerSideProps({ req, res }) {
-  // const firebaseData = await axios.get("/api/get/todos");
   const session = await getSession({ req });
 
   const collection = await firebasedb
@@ -56,6 +52,6 @@ export async function getServerSideProps({ req, res }) {
   const todos = JSON.parse(JSON.stringify(firebaseData));
 
   return {
-    props: { todos },
+    props: { todos, session },
   };
 }
