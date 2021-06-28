@@ -1,27 +1,24 @@
-import { useState } from "react";
-import firebase from "firebase";
+import { useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/client";
-import firebasedb from "../firebase";
+import axios from "../axios";
 
 function AddTodoForm() {
   const [title, setTitle] = useState("");
   const [session] = useSession();
+  const inputRef = useRef();
+
+  useEffect(() => {
+    inputRef.current.focus();
+  }, []);
 
   const addTodo = async (e) => {
     e.preventDefault();
 
-    const data = {
-      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      username: session?.user?.name,
-      title: title,
-      isChecked: false,
-    };
-
-    const response = await firebasedb
-      .collection("users")
-      .doc(session?.user?.name)
-      .collection("todos")
-      .add(data)
+    await axios
+      .post("/api/todos", {
+        username: session?.user?.name,
+        title: title,
+      })
       .then(() => {
         setTitle("");
       });
@@ -38,6 +35,7 @@ function AddTodoForm() {
     >
       <p className="h-5 w-5 border-2 border-gray-700 rounded-full ml-3 z-50 opacity-80" />
       <input
+        ref={inputRef}
         className="mx-3 pr-3 w-full h-16 bg-transparent bg-opacity-100 focus:outline-none active:bg-transparent text-black text-opacity-50 dark:text-white dark:text-opacity-50"
         value={title}
         onChange={handleTitleChange}

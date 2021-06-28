@@ -1,18 +1,11 @@
 import Head from "next/head";
-import { getSession, signIn, useSession } from "next-auth/client";
-import firebasedb from "../firebase";
-import { useState } from "react";
+import { signIn, useSession } from "next-auth/client";
 import TodosHome from "../components/TodosHome";
+import { useTheme } from "../context/ThemeContext";
 
-export default function Home({ todos, activeTodos, completedTodos }) {
+export default function Home() {
   const [session, loading] = useSession();
-  const [isDark, setDark] = useState(false);
-
-  const handleDarkMode = () => {
-    const mode = isDark ? false : true;
-    setDark(mode);
-  };
-  
+  const darkTheme = useTheme();
 
   return loading ? (
     <div className="grid place-items-center h-screen bg-gray-800">
@@ -21,74 +14,14 @@ export default function Home({ todos, activeTodos, completedTodos }) {
       </p>
     </div>
   ) : (
-    <div className={`${isDark && "dark"}`}>
+    <div className={`${darkTheme && "dark"}`}>
       <Head>
         <title>TODO App</title>
       </Head>
 
       {!session && signIn()}
 
-      {session && (
-        <TodosHome
-          isDark={isDark}
-          todos={todos}
-          activeTodos={activeTodos}
-          completedTodos={completedTodos}
-          handleDarkMode={handleDarkMode}
-        />
-      )}
+      {session && <TodosHome />}
     </div>
   );
-}
-
-export async function getServerSideProps({ req, res }) {
-  const session = await getSession({ req });
-
-  const collection = await firebasedb
-    .collection("users")
-    .doc(session?.user?.name)
-    .collection("todos")
-    .orderBy("createdAt")
-    .get();
-
-  const firebaseData = collection.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  }));
-
-  const todos = JSON.parse(JSON.stringify(firebaseData));
-
-  const activeCollection = await firebasedb
-    .collection("users")
-    .doc(session?.user?.name)
-    .collection("todos")
-    .where("isChecked", "==", false)
-    .orderBy("createdAt")
-    .get();
-
-  const activeCollectionData = activeCollection.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  }));
-
-  const activeTodos = JSON.parse(JSON.stringify(activeCollectionData));
-
-  const completedCollection = await firebasedb
-    .collection("users")
-    .doc(session?.user?.name)
-    .collection("todos")
-    .where("isChecked", "==", true)
-    .orderBy("createdAt")
-    .get();
-
-  const completedCollectionData = completedCollection.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  }));
-
-  const completedTodos = JSON.parse(JSON.stringify(completedCollectionData));
-
-  return {
-    props: { todos, activeTodos, completedTodos },
-  };
 }

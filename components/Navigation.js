@@ -1,26 +1,50 @@
 import { useSession } from "next-auth/client";
 import { useEffect, useState } from "react";
 import firebasedb from "../firebase";
+import { useCollection } from "react-firebase-hooks/firestore";
 
-function Navigation({
-  todos,
-  activeTodos,
-  completedTodos,
-  resourceType,
-  setResourceType,
-}) {
+function Navigation({ resourceType, setResourceType }) {
   const [session] = useSession();
-  const [length, setLength] = useState(todos.length);
+  const [todosSnapshot] = useCollection(
+    firebasedb
+      .collection("users")
+      .doc(session?.user?.name)
+      .collection("todos")
+      .orderBy("createdAt")
+  );
+  const [activeTodosSnapshot] = useCollection(
+    firebasedb
+      .collection("users")
+      .doc(session?.user?.name)
+      .collection("todos")
+      .where("isChecked", "==", false)
+      .orderBy("createdAt")
+  );
+  const [completedTodosSnapshot] = useCollection(
+    firebasedb
+      .collection("users")
+      .doc(session?.user?.name)
+      .collection("todos")
+      .where("isChecked", "==", true)
+      .orderBy("createdAt")
+  );
+
+  const [length, setLength] = useState(todosSnapshot?.docs.length);
 
   useEffect(() => {
     const newLength =
       resourceType == "todos"
-        ? todos.length
+        ? todosSnapshot?.docs.length
         : resourceType == "activeTodos"
-        ? activeTodos.length
-        : completedTodos.length;
+        ? activeTodosSnapshot?.docs.length
+        : completedTodosSnapshot?.docs.length;
     setLength(newLength);
-  }, [resourceType]);
+  }, [
+    todosSnapshot,
+    activeTodosSnapshot,
+    completedTodosSnapshot,
+    resourceType,
+  ]);
 
   const deleteCompletedTodos = async () => {
     const completedCollection = await firebasedb
@@ -46,12 +70,14 @@ function Navigation({
   };
 
   return (
-    <div className="mx-3 h-14 flex justify-around items-center">
-      <p className="text-black text-opacity-50 dark:text-white dark:text-opacity-50 text-sm w-auto">
+    <div className="mx-3 py-3 flex justify-around items-center">
+      <p className="hidden lg:block text-black text-opacity-50 dark:text-white dark:text-opacity-50 text-sm w-auto">
         {length} items left
       </p>
       <div className="grid grid-cols-3 gap-4 place-content-center justify-items-center">
         <p
+          tabIndex="1"
+          onKeyPress={() => setResourceType("todos")}
           className={`${
             resourceType == "todos" && "navActive"
           } text-black text-opacity-80 dark:text-white dark:text-opacity-80 link`}
@@ -60,6 +86,8 @@ function Navigation({
           All
         </p>
         <p
+          tabIndex="1"
+          onKeyPress={() => setResourceType("activeTodos")}
           className={`${
             resourceType == "activeTodos" && "navActive"
           } text-black text-opacity-80 dark:text-white dark:text-opacity-80 link`}
@@ -68,6 +96,8 @@ function Navigation({
           Active
         </p>
         <p
+          tabIndex="1"
+          onKeyPress={() => setResourceType("completedTodos")}
           className={`${
             resourceType == "completedTodos" && "navActive"
           } text-black text-opacity-80 dark:text-white dark:text-opacity-80 link`}
@@ -77,8 +107,10 @@ function Navigation({
         </p>
       </div>
       <p
+        tabIndex="1"
+        onKeyPress={deleteCompletedTodos}
         onClick={deleteCompletedTodos}
-        className="text-black text-opacity-50 dark:text-white dark:text-opacity-50 text-sm link w-auto break-words"
+        className="hidden lg:block text-black text-opacity-50 dark:text-white dark:text-opacity-50 text-sm w-auto break-words"
       >
         clear completed
       </p>

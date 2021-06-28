@@ -34,14 +34,18 @@ function ViewTemplate({ id, title, isChecked, setEditing }) {
   };
 
   return (
-    <div className="flex items-center py-5 h-auto shadow-inner hover:bg-gray-200 dark:hover:bg-gray-900">
+    <div className="flex items-center py-5 h-auto shadow-inner hover:bg-gray-200 dark:hover:bg-gray-900 transition duration-150 ease-out">
       {!isChecked ? (
         <p
+          tabIndex="1"
+          onKeyPress={toggleChecked}
           className="h-5 w-5 border-2 border-gray-700 rounded-full ml-3 z-50 cursor-pointer opacity-80"
           onClick={toggleChecked}
         ></p>
       ) : (
         <CheckCircleIcon
+          tabIndex="1"
+          onKeyPress={toggleChecked}
           onClick={toggleChecked}
           className="h-5 w-5 text-green-500 ml-3 z-50 cursor-pointer"
         />

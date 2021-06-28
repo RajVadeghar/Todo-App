@@ -22,6 +22,7 @@ function EditingTemplate({ id, editTodo, setEditing, title }) {
     >
       <p className="h-5 w-5 border-2 border-gray-700 rounded-full ml-3 z-50" />
       <input
+        ref={inputRef}
         className="mx-3 pr-3 w-full h-16 bg-transparent bg-opacity-100 focus:outline-none active:bg-transparent text-black text-opacity-50 dark:text-white dark:text-opacity-50"
         value={newName}
         onChange={(e) => setNewName(e.target.value)}
