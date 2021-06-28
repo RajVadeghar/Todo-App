@@ -1,6 +1,5 @@
 import { useSession } from "next-auth/client";
 import { useCollection } from "react-firebase-hooks/firestore";
-import firebase from "firebase";
 import Todo from "./Todo";
 import Banner from "./Banner";
 import Header from "./Header";
@@ -10,6 +9,7 @@ import Navigation from "./Navigation";
 import { useState } from "react";
 import { useTodos } from "../context/TodoContext";
 import Footer from "./Footer";
+import axios from "axios";
 
 function TodosHome() {
   const [session] = useSession();
@@ -19,14 +19,14 @@ function TodosHome() {
   const [todosSnapshot] = useCollection(
     firebasedb
       .collection("users")
-      .doc(session?.user?.name)
+      .doc(session?.user?.email)
       .collection("todos")
       .orderBy("createdAt")
   );
   const [activeTodosSnapshot] = useCollection(
     firebasedb
       .collection("users")
-      .doc(session?.user?.name)
+      .doc(session?.user?.email)
       .collection("todos")
       .where("isChecked", "==", false)
       .orderBy("createdAt")
@@ -34,23 +34,21 @@ function TodosHome() {
   const [completedTodosSnapshot] = useCollection(
     firebasedb
       .collection("users")
-      .doc(session?.user?.name)
+      .doc(session?.user?.email)
       .collection("todos")
       .where("isChecked", "==", true)
       .orderBy("createdAt")
   );
   const [length, setLength] = useState(todosSnapshot?.docs.length);
 
-  const editTodo = async (id, newName) => {
-    const response = await firebasedb
-      .collection("users")
-      .doc(session.user.name)
-      .collection("todos")
-      .doc(id)
-      .update({
-        title: newName,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+  const editTodo = async (id, title) => {
+    try {
+      await axios.put(`/api/todo/${id}`, {
+        title,
       });
+    } catch (error) {
+      console.warn(error.response.data);
+    }
   };
 
   const showTodos = () => {
@@ -125,19 +123,25 @@ function TodosHome() {
     }
   };
 
+  const deleteCompletedTodos = async () => {
+    await axios.delete("/api/todos");
+  };
+
   return (
     <div className="relative w-full min-h-screen h-auto bg-gray-200 dark:bg-gray-900 flex flex-col justify-center items-center">
       <Banner />
 
-      <div className="text-white z-30 flex-grow mt-[-200px] p-3 w-full md:w-2/3 lg:w-1/3 ">
+      <div className="text-white z-30 flex-grow mt-[-230px] md:mt-[-200px] mb-11 p-3 w-full md:w-2/3 lg:w-1/3 ">
         <Header />
         <AddTodoForm />
         <div className="shadow-2xl drop-shadow-2xl">
           <div className="bg-gray-50 dark:bg-gray-800 w-full rounded-sm">
             <Navigation
+              length={length}
               setLength={setLength}
               resourceType={resourceType}
               setResourceType={setResourceType}
+              deleteCompletedTodos={deleteCompletedTodos}
             />
           </div>
           <div className="bg-gray-100 dark:bg-gray-800 w-full rounded-sm max-h-full md:max-h-96 md:overflow-auto scroll">
@@ -146,7 +150,10 @@ function TodosHome() {
             {resourceType === "completedTodos" && showCompletedTodos()}
           </div>
           <div className="block lg:hidden bg-gray-50 dark:bg-gray-800 w-full rounded-sm">
-            <Footer length={length} />
+            <Footer
+              length={length}
+              deleteCompletedTodos={deleteCompletedTodos}
+            />
           </div>
         </div>
       </div>

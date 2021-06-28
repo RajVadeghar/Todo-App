@@ -1,32 +1,28 @@
-import firebasedb from "../firebase";
 import { XIcon } from "@heroicons/react/outline";
 import { CheckCircleIcon } from "@heroicons/react/outline";
-import firebase from "firebase";
 import { useSession } from "next-auth/client";
+import axios from "axios";
 
 function ViewTemplate({ id, title, isChecked, setEditing }) {
   const [session] = useSession();
 
   const deleteTodo = async () => {
-    await firebasedb
-      .collection("users")
-      .doc(session.user.name)
-      .collection("todos")
-      .doc(id)
-      .delete();
+    try {
+      await axios.delete(`/api/todo/${id}`);
+    } catch (e) {
+      console.warn(e.response.data);
+    }
   };
 
   const toggleChecked = async () => {
     const boolCheck = isChecked ? false : true;
-    await firebasedb
-      .collection("users")
-      .doc(session.user.name)
-      .collection("todos")
-      .doc(id)
-      .update({
+    try {
+      await axios.put(`/api/todo/${id}`, {
         isChecked: boolCheck,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
       });
+    } catch (error) {
+      console.warn(error.response.data);
+    }
   };
 
   const handleDoubleClick = () => {

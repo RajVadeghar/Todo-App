@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/client";
-import axios from "../axios";
+import axios from "axios";
 
 function AddTodoForm() {
   const [title, setTitle] = useState("");

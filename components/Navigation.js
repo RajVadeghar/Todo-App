@@ -1,21 +1,27 @@
 import { useSession } from "next-auth/client";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import firebasedb from "../firebase";
 import { useCollection } from "react-firebase-hooks/firestore";
 
-function Navigation({ resourceType, setResourceType }) {
+function Navigation({
+  length,
+  setLength,
+  resourceType,
+  setResourceType,
+  deleteCompletedTodos,
+}) {
   const [session] = useSession();
   const [todosSnapshot] = useCollection(
     firebasedb
       .collection("users")
-      .doc(session?.user?.name)
+      .doc(session?.user?.email)
       .collection("todos")
       .orderBy("createdAt")
   );
   const [activeTodosSnapshot] = useCollection(
     firebasedb
       .collection("users")
-      .doc(session?.user?.name)
+      .doc(session?.user?.email)
       .collection("todos")
       .where("isChecked", "==", false)
       .orderBy("createdAt")
@@ -23,13 +29,11 @@ function Navigation({ resourceType, setResourceType }) {
   const [completedTodosSnapshot] = useCollection(
     firebasedb
       .collection("users")
-      .doc(session?.user?.name)
+      .doc(session?.user?.email)
       .collection("todos")
       .where("isChecked", "==", true)
       .orderBy("createdAt")
   );
-
-  const [length, setLength] = useState(todosSnapshot?.docs.length);
 
   useEffect(() => {
     const newLength =
@@ -45,29 +49,6 @@ function Navigation({ resourceType, setResourceType }) {
     completedTodosSnapshot,
     resourceType,
   ]);
-
-  const deleteCompletedTodos = async () => {
-    const completedCollection = await firebasedb
-      .collection("users")
-      .doc(session?.user?.name)
-      .collection("todos")
-      .where("isChecked", "==", true)
-      .get();
-
-    const batchSize = completedCollection.size;
-
-    if (batchSize === 0) {
-      resolve();
-      return;
-    }
-
-    const batch = firebasedb.batch();
-
-    completedCollection.docs.forEach((doc) => {
-      batch.delete(doc.ref);
-    });
-    await batch.commit();
-  };
 
   return (
     <div className="mx-3 py-3 flex justify-around items-center">
@@ -110,7 +91,7 @@ function Navigation({ resourceType, setResourceType }) {
         tabIndex="1"
         onKeyPress={deleteCompletedTodos}
         onClick={deleteCompletedTodos}
-        className="hidden lg:block text-black text-opacity-50 dark:text-white dark:text-opacity-50 text-sm w-auto break-words"
+        className="hidden lg:block clearCompleted"
       >
         clear completed
       </p>
