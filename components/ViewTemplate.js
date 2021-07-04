@@ -1,11 +1,8 @@
 import { XIcon } from "@heroicons/react/outline";
 import { CheckCircleIcon } from "@heroicons/react/outline";
-import { useSession } from "next-auth/client";
 import axios from "axios";
 
 function ViewTemplate({ id, title, isChecked, setEditing }) {
-  const [session] = useSession();
-
   const deleteTodo = async () => {
     try {
       await axios.delete(`/api/todo/${id}`);
@@ -23,10 +20,6 @@ function ViewTemplate({ id, title, isChecked, setEditing }) {
     } catch (error) {
       console.warn(error.response.data);
     }
-  };
-
-  const handleDoubleClick = () => {
-    setEditing(true);
   };
 
   return (
@@ -51,7 +44,7 @@ function ViewTemplate({ id, title, isChecked, setEditing }) {
           isChecked &&
           "line-through text-black text-opacity-40 dark:text-white dark:text-opacity-40"
         } break-all flex-grow mx-3 text-black text-opacity-80 dark:text-white dark:text-opacity-80`}
-        onDoubleClick={handleDoubleClick}
+        onDoubleClick={() => setEditing(true)}
       >
         {title}
       </p>

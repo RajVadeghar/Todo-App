@@ -5,10 +5,6 @@ import ViewTemplate from "./ViewTemplate";
 function Todo({ id, title, isChecked, editTodo }) {
   const [isEditing, setEditing] = useState(false);
 
-  /* const time = new Date(
-    (createdAt.seconds + createdAt.nanoseconds * 10 ** -9) * 1000
-  ); */
-
   return isEditing ? (
     <EditingTemplate
       id={id}

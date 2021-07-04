@@ -8,7 +8,7 @@ function EditingTemplate({ id, editTodo, setEditing, title }) {
     inputRef?.current?.focus();
   }, []);
 
-  const handleClick = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     editTodo(id, newName);
     setNewName("");
@@ -18,7 +18,7 @@ function EditingTemplate({ id, editTodo, setEditing, title }) {
   return (
     <form
       className="flex items-center bg-gray-100 dark:bg-gray-800 w-full"
-      onSubmit={handleClick}
+      onSubmit={handleSubmit}
     >
       <p className="h-5 w-5 border-2 border-gray-700 rounded-full ml-3 z-50" />
       <input
@@ -28,7 +28,7 @@ function EditingTemplate({ id, editTodo, setEditing, title }) {
         onChange={(e) => setNewName(e.target.value)}
         type="text"
       />
-      <button className="hidden btn mt-3" onClick={handleClick} type="submit">
+      <button className="hidden btn mt-3" onClick={handleSubmit} type="submit">
         Submit
       </button>
     </form>

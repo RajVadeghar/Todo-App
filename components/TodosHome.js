@@ -1,44 +1,19 @@
-import { useSession } from "next-auth/client";
-import { useCollection } from "react-firebase-hooks/firestore";
 import Todo from "./Todo";
 import Banner from "./Banner";
 import Header from "./Header";
 import AddTodoForm from "./AddTodoForm";
-import firebasedb from "../firebase";
 import Navigation from "./Navigation";
 import { useState } from "react";
 import { useTodos } from "../context/TodoContext";
 import Footer from "./Footer";
 import axios from "axios";
+import { useSnapshot } from "../context/SnapshotContext";
 
 function TodosHome() {
-  const [session] = useSession();
   const [resourceType, setResourceType] = useState("todos");
   const { todos, activeTodos, completedTodos } = useTodos();
-
-  const [todosSnapshot] = useCollection(
-    firebasedb
-      .collection("users")
-      .doc(session?.user?.email)
-      .collection("todos")
-      .orderBy("createdAt")
-  );
-  const [activeTodosSnapshot] = useCollection(
-    firebasedb
-      .collection("users")
-      .doc(session?.user?.email)
-      .collection("todos")
-      .where("isChecked", "==", false)
-      .orderBy("createdAt")
-  );
-  const [completedTodosSnapshot] = useCollection(
-    firebasedb
-      .collection("users")
-      .doc(session?.user?.email)
-      .collection("todos")
-      .where("isChecked", "==", true)
-      .orderBy("createdAt")
-  );
+  const { todosSnapshot, activeTodosSnapshot, completedTodosSnapshot } =
+    useSnapshot();
   const [length, setLength] = useState(todosSnapshot?.docs.length);
 
   const editTodo = async (id, title) => {

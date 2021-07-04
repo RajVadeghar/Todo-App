@@ -1,7 +1,6 @@
 import { useSession } from "next-auth/client";
 import { useEffect } from "react";
-import firebasedb from "../firebase";
-import { useCollection } from "react-firebase-hooks/firestore";
+import { useSnapshot } from "../context/SnapshotContext";
 
 function Navigation({
   length,
@@ -10,30 +9,8 @@ function Navigation({
   setResourceType,
   deleteCompletedTodos,
 }) {
-  const [session] = useSession();
-  const [todosSnapshot] = useCollection(
-    firebasedb
-      .collection("users")
-      .doc(session?.user?.email)
-      .collection("todos")
-      .orderBy("createdAt")
-  );
-  const [activeTodosSnapshot] = useCollection(
-    firebasedb
-      .collection("users")
-      .doc(session?.user?.email)
-      .collection("todos")
-      .where("isChecked", "==", false)
-      .orderBy("createdAt")
-  );
-  const [completedTodosSnapshot] = useCollection(
-    firebasedb
-      .collection("users")
-      .doc(session?.user?.email)
-      .collection("todos")
-      .where("isChecked", "==", true)
-      .orderBy("createdAt")
-  );
+  const { todosSnapshot, activeTodosSnapshot, completedTodosSnapshot } =
+    useSnapshot();
 
   useEffect(() => {
     const newLength =
