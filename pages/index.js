@@ -2,21 +2,19 @@ import Head from "next/head";
 import { signIn, useSession } from "next-auth/client";
 import TodosHome from "../components/TodosHome";
 import { useTheme } from "../context/ThemeContext";
-import LoadingScreen from "../screens/LoadingScreen";
+import Login from "../components/Login";
 
 export default function Home() {
-  const [session, loading] = useSession();
+  const [session] = useSession();
   const darkTheme = useTheme();
 
-  return loading ? (
-    <LoadingScreen />
-  ) : (
+  return (
     <div className={`${darkTheme && "dark"}`}>
       <Head>
         <title>TODO App</title>
       </Head>
 
-      {!session ? signIn() : <TodosHome />}
+      {!session ? <Login /> : <TodosHome />}
     </div>
   );
 }
